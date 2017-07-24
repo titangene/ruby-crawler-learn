@@ -153,22 +153,3 @@ while i < _page do
   i += 1
   visit("http://news.stust.edu.tw/User/UserShowNewsList.aspx?page=#{i}")
 end
-
-# news = all(news_table_css + news_table_tr_td_css)[0]
-# _sleep(1, 16, news_table_css)
-# news.find('div.list_menu a').trigger('click')
-# _sleep(1, 16, news_title_css)
-# newsHTML = Nokogiri::HTML(page.body)
-# news_title = newsHTML.css(news_title_css).text
-# puts news_title
-# #visit(url)
-# page.go_back
-
-# news = all(news_table_css + news_table_tr_td_css)[1]
-# _sleep(1, 16, news_table_css)
-# news.find('div.list_menu a').trigger('click')
-# _sleep(1, 16, news_title_css)
-# newsHTML = Nokogiri::HTML(page.body)
-# news_title = newsHTML.css(news_title_css).text
-# puts news_title
-
