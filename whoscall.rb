@@ -11,6 +11,12 @@ phonenumber ||= ""
 country = ARGV[1]
 country ||= "Taiwan"
 
+if phonenumber == ""
+  puts "value 1: Please input phone number"
+  puts "value 2: Please input country (optional), Default: Taiwan"
+  exit
+end
+
 options = {
   :window_size => [1280, 800],
   :js_errors => false
@@ -25,13 +31,26 @@ end
 url = "https://number.whoscall.com"
 visit(url)
 
-if phonenumber == ""
-  puts "value 1: Please input phone number"
-  puts "value 2: Please input country (optional), Default: Taiwan"
-  exit
+def _sleep(t, t_max, css)
+  time = 0
+  while !page.has_selector?(css) do
+    sleep(t)
+    time += t
+    puts "#{css} - Zzz... #{time} sec"
+    break if time > t_max
+  end
+
+  if time > t_max
+    puts "Sleep more than #{t_max} seconds to stop the crawler"
+    exit
+  end
 end
 
+_sleep(1, 20, 'div.selected-flag')
+
 find('div.selected-flag').trigger('click')
+
+# _sleep(1, 20, 'ul.country-list')
 
 all('ul.country-list li').each do |option|
   if option.text.include?(country)
@@ -51,18 +70,7 @@ if page.has_selector?('input.error')
   exit
 end
 
-time = 0
-while !page.has_selector?('h1.number-info__name') do
-  sleep(1)
-  time += 1
-  puts "Zzz... #{time} sec"
-  break if time > 200
-end
-
-if time > 200
-  puts "Sleep more than 200 seconds to stop the crawler"
-  exit
-end
+_sleep(1, 200, 'h1.number-info__name')
 
 search_Result = Nokogiri::HTML(page.body)
 s_result_title = search_Result.css('h1.number-info__name').text.strip
@@ -86,12 +94,12 @@ if page.has_selector?('div.ohours')
 
   ohours_more_list = ohours.css('ul.ohours__list>li')
 
-  ohours_more_list.each_with_index do |more_list|
+  ohours_more_list.each do |more_list|
     weekday = more_list.css('span.weekday').text
     puts "#{weekday}"
     
     weekday_time = more_list.css('ul li')
-    weekday_time.each_with_index do |time|
+    weekday_time.each do |time|
       weekday_time = time.text
       puts "#{weekday_time}"
     end
