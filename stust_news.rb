@@ -1,3 +1,4 @@
+require_relative 'common'
 require 'capybara'
 require 'capybara/dsl'
 require 'capybara/poltergeist'
@@ -16,21 +17,6 @@ Capybara.register_driver :poltergeist do |app|
   Capybara::Poltergeist::Driver.new(app, options)
 end
 
-def _sleep(t, t_max, css)
-  time = 0
-  while !page.has_selector?(css) do
-    sleep(t)
-    time += t
-    puts "#{css} - Zzz... #{time} sec"
-    break if time > t_max
-  end
-
-  if time > t_max
-    puts "Sleep more than #{t_max} seconds to stop the crawler"
-    exit
-  end
-end
-
 url = "http://news.stust.edu.tw/User/UserShowNewsList.aspx"
 visit(url)
 
@@ -38,8 +24,8 @@ news_table_css = "table#ctl00_ContentPlaceHolder1_gv_NewsList "
 news_table_tr_td_css = "tr:not(:first-child):not(:last-child) td:nth-child(2)"
 news_table_date_css = "tr:not(:first-child):not(:last-child) td:last-child"
 news_title_css = "span#ctl00_ContentPlaceHolder1_FormView1_TitleLabel"
-news_page_css = "tr:last-child td table td"
 
+# 過濾個人不需要的公告關鍵字，可自訂
 @filters = ["約聘", "助理", "工讀生", "計畫徵求", "計畫申覆", "自主培育", "招標", "二技申請入學", 
   "暑假轉學考", "暑修", "毒家新聞", "四技甄選入學", "優活館", "四技甄選", "二、四技進修部", "繪圖設計", 
   "職場體驗", "大學部新生", "登革熱", "暑期第", "進修部轉學生", "幼兒", "陸生暑假", "動物之家", "藝術", 
@@ -55,10 +41,14 @@ news_page_css = "tr:last-child td table td"
   "師資培育", "會計員", "通識教育", "釣魚台", "社會發展", "財政稅務局", "保險理賠", "升級作業", "反詐騙", 
   "學會會長", "暑假期間六宿", "樹林機車", "汽車通行", "四技技優", "自殺", "紫絲帶獎", "日間部(延修生)", 
   "身障", "看見台灣", "民眾資訊素養", "弱勢家庭", "反毒", "救國團", "四技甄試", "整修工程", "軍事訓練", 
-  "機車事故", "治安簡訊", "詐騙", "暑期進修部", "時代潮流"]
+  "機車事故", "治安簡訊", "詐騙", "暑期進修部", "時代潮流", "四技聯合登記", "住宿", "轉學考正取", 
+  "轉學考備取", "工讀", "禁止停放汽車", "僑港澳生", "進修部網路報名", "身心障礙", "大學部陸生", "環境維護",
+  "連江縣政府", "原住民", "獎助教師", "iPad", "跨文化大使", "農產品", "進修部網路", "轉學考第", "機構設計", 
+  "半導體設備", "大一新生", "港埠"]
 
+  # 過濾個人須保留的公告關鍵字，可自訂
 @filters_save = ["碩士", "研討會", "碩延", "程式競賽", "論文", "創業", "講座", "正職", 
-  "職涯", "研究生", "雲端", "資訊人員", "黑客松"]
+  "職涯", "研究生", "雲端", "資訊人員", "黑客松", "停班停課"]
 
 _page = ARGV[0]
 _page ||= 1
@@ -111,7 +101,9 @@ while i < _page do
   while j < news_list_count do
     _sleep(1, 16, news_table_css)
 
-    news_title =  news_list[j].find('div.list_menu a')[:title]
+    news = news_list[j].find('div.list_menu a')
+    news_title = news[:title]
+    news_url = news[:href]
     news_date = news_date_list[j].text
     _filter(news_title)
 
@@ -119,12 +111,12 @@ while i < _page do
       news_no = j + 1 + (i * news_list_count)
       news_no = "%03d" % news_no
       if debug_mode == 'd'
-        puts "No.#{news_no}: #{news_date} '#{@filter_save_str}': #{news_title}"
+        puts "No.#{news_no}: #{news_date} #{news_url} '#{@filter_save_str}': #{news_title}"
       else
-        puts "No.#{news_no}: #{news_date} #{news_title}"
+        puts "No.#{news_no}: #{news_date} #{news_url} : #{news_title}"
       end
     elsif !@filter_bool and debug_mode == 'd'
-      puts "Filter: #{news_date} '#{@filter_str}': #{news_title}"
+      puts "Filter: #{news_date} #{news_url} '#{@filter_str}': #{news_title}"
     elsif @filter_bool
       news_list[j].find('div.list_menu a').trigger('click')
       _sleep(1, 16, news_title_css)
@@ -135,12 +127,12 @@ while i < _page do
         news_no = j + 1 + (i * news_list_count)
         news_no = "%03d" % news_no
         if debug_mode == 'd'
-          puts "No.#{news_no}: #{news_date} '#{@filter_save_str}': #{news_title}"
+          puts "No.#{news_no}: #{news_date} #{news_url} '#{@filter_save_str}': #{news_title}"
         else
-          puts "No.#{news_no}: #{news_date} #{news_title}"
+          puts "No.#{news_no}: #{news_date} #{news_url} : #{news_title}"
         end
       elsif !@filter_bool and debug_mode == 'd'
-        puts "Filter: #{news_date} '#{@filter_str}': #{news_title}"
+        puts "Filter: #{news_date} #{news_url} '#{@filter_str}': #{news_title}"
       end
 
       page.go_back
