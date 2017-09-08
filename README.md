@@ -1,5 +1,15 @@
 # ruby-crawler-learn (Ruby 爬蟲)
 
+## Install
+```shell
+$ bundle
+```
+
+## Run
+```
+$ ruby stust_news.rb
+```
+
 ## Whoscall crawler
 Source code: [Whoscall crawler](./whoscall.rb)
 
