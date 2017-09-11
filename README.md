@@ -58,4 +58,23 @@ Source code: [Whoscall crawler](./whoscall.rb)
 ## STUST News crawler (南臺科技大學 最新消息 爬蟲)
 Source code: [STUST News crawler](./stust_news.rb)
 
-![STUST News crawler](./image/stust_news.png)
+```shell
+// value 1: Please input the number of pages printed (optional)
+// value 2: mode (optional)，'d' -> Debug mode (filter)，'s' -> Single news
+
+// 顯示一頁
+$ ruby stust_news.rb
+
+// 顯示兩頁
+$ ruby stust_news.rb 2
+
+// 顯示三頁，並顯示 Debug mode
+$ ruby stust_news.rb 3 d
+
+// 顯示 id 51255 的消息
+$ ruby stust_news.rb 51255 s
+```
+
+![STUST News crawler](./image/stust_news_1.png)
+
+![STUST News crawler](./image/stust_news_2.png)
